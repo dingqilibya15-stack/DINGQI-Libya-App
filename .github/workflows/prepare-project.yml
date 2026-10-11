@@ -1,30 +1,42 @@
 name: Prepare DINGQI project files
+
 on:
+  workflow_dispatch:
   push:
-    branches:
-      - '**'
+    paths:
+      - 'DINGQI_Libya_Full_Project.zip'
+      - '.github/workflows/prepare-project.yml'
+
 permissions:
   contents: write
+
 jobs:
   prepare:
-    if: ${{ hashFiles('DINGQI_Libya_Full_Project.zip') != '' }}
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Extract project files into repository root
+
+      - name: Check project ZIP
+        run: |
+          test -f DINGQI_Libya_Full_Project.zip || {
+            echo "Project ZIP file not found"
+            exit 1
+          }
+
+      - name: Extract project files
         run: |
           unzip -q DINGQI_Libya_Full_Project.zip -d extracted
           cp -a extracted/DINGQI_Libya_Full_Project/. .
           rm -rf extracted DINGQI_Libya_Full_Project.zip
-      - name: Commit extracted project files
+
+      - name: Commit project files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           if ! git diff --cached --quiet; then
-            git commit -m "Set up DINGQI Android project"
+            git commit -m "Prepare DINGQI project"
             git push
           fi
