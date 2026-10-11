@@ -1,42 +1,38 @@
-name: Prepare DINGQI project files
+name: Prepare DINGQI Project
 
 on:
-  workflow_dispatch:
-  push:
-    paths:
-      - 'DINGQI_Libya_Full_Project.zip'
-      - '.github/workflows/prepare-project.yml'
+workflow_dispatch:
+push:
+paths:
+- 'DINGQI_Libya_Full_Project.zip'
+- '.github/workflows/prepare-project.yml'
 
 permissions:
-  contents: write
+contents: write
 
 jobs:
-  prepare:
-    runs-on: ubuntu-latest
+prepare:
+runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+    with:
+      token: ${{ github.token }}
 
-      - name: Check project ZIP
-        run: |
-          test -f DINGQI_Libya_Full_Project.zip || {
-            echo "Project ZIP file not found"
-            exit 1
-          }
+  - name: Extract project files
+    run: |
+      test -f DINGQI_Libya_Full_Project.zip || exit 1
+      unzip -oq DINGQI_Libya_Full_Project.zip -d extracted
+      cp -an extracted/DINGQI_Libya_Full_Project/. . || true
+      rm -rf extracted
 
-      - name: Extract project files
-        run: |
-          unzip -q DINGQI_Libya_Full_Project.zip -d extracted
-          cp -a extracted/DINGQI_Libya_Full_Project/. .
-          rm -rf extracted DINGQI_Libya_Full_Project.zip
-
-      - name: Commit project files
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "Prepare DINGQI project"
-            git push
-          fi
+  - name: Save project files
+    run: |
+      git config user.name "github-actions[bot]"
+      git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      git add -A
+      if ! git diff --cached --quiet; then
+        git commit -m "Prepare DINGQI project"
+        git push
+      fi
