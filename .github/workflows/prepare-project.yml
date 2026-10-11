@@ -1,0 +1,30 @@
+name: Prepare DINGQI project files
+on:
+  push:
+    branches:
+      - '**'
+permissions:
+  contents: write
+jobs:
+  prepare:
+    if: ${{ hashFiles('DINGQI_Libya_Full_Project.zip') != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract project files into repository root
+        run: |
+          unzip -q DINGQI_Libya_Full_Project.zip -d extracted
+          cp -a extracted/DINGQI_Libya_Full_Project/. .
+          rm -rf extracted DINGQI_Libya_Full_Project.zip
+      - name: Commit extracted project files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Set up DINGQI Android project"
+            git push
+          fi
